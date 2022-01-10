@@ -179,6 +179,7 @@ impl App {
                 "j",
                 "Decreases the step size for manipulating the pose estimate.",
             ],
+            ["L", "Enables the rosout log display."],
             ["h", "Shows this page."],
             ["Ctrl+c", "Quits the application."],
         ];
