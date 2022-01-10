@@ -60,9 +60,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut running_app = default_app_config.lock().unwrap();
     let mut terminal = running_app.init_terminal().unwrap();
 
-    let rosout_buffer_size = 100;
-    let mut rosout_listener = rosout::RosoutListener::new(rosout_buffer_size, false);
-
     loop {
         match running_app.mode {
             app::AppModes::RobotView | app::AppModes::SendPose | app::AppModes::Teleoperate => {
@@ -180,11 +177,6 @@ fn main() -> Result<(), Box<dyn Error>> {
                     Event::Tick => {}
                 }
             }
-
-        }
-
-        for logstring in rosout_listener.drain_logstring_buffer().iter() {
-            println!("{}", logstring);
         }
     }
     Ok(())

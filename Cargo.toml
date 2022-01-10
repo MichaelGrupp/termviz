@@ -8,6 +8,7 @@ exclude = ["assets/*", ".github"]
 
 
 [dependencies]
+ansi-to-tui = "*"
 colored = "*"
 nalgebra = ">=0.29.0"
 ringbuf = "*"

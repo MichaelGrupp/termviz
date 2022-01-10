@@ -2,7 +2,6 @@ use crate::config::ListenerConfig;
 use crate::laser;
 use crate::map;
 use crate::marker;
-use crate::rosout;
 
 use std::sync::Arc;
 

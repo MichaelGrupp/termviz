@@ -19,17 +19,18 @@ impl LogBuffer {
     }
 
     pub fn push_logstring(&mut self, logstring: String) {
+        if self.producer.remaining() == 0 {
+          self.consumer.pop();
+        }
         if self.producer.push(logstring).is_err() {
-            // Ignore buffer overflow.
+            eprintln!("failed to buffer rosout log")
         }
     }
 
-    pub fn drain_logstrings(&mut self) -> std::vec::Vec<String> {
-        let mut logstrings = std::vec::Vec::<String>::new();
-        while !self.consumer.is_empty() {
-            logstrings.push(self.consumer.pop().unwrap());
-        }
-        return logstrings;
+    pub fn read_logstrings(&self) -> std::vec::Vec<String> {
+      let mut logstrings = std::vec::Vec::<String>::new();
+      self.consumer.for_each(|logstring| {logstrings.push(logstring.clone());});
+      return logstrings;
     }
 }
 
@@ -91,7 +92,7 @@ impl RosoutListener {
             !self.log_buffer.read().unwrap().is_buffering;
     }
 
-    pub fn drain_logstring_buffer(&self) -> std::vec::Vec<String> {
-        return self.log_buffer.write().unwrap().drain_logstrings();
+    pub fn read_logstring_buffer(&self) -> std::vec::Vec<String> {
+        return self.log_buffer.write().unwrap().read_logstrings();
     }
 }

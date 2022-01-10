@@ -1,7 +1,9 @@
 use crate::config::get_config;
 use crate::footprint::{get_current_footprint, get_footprint};
 use crate::listeners::Listeners;
+use crate::rosout;
 use crate::transformation;
+use ansi_to_tui::ansi_to_text;
 use nalgebra::{Isometry2, Vector2};
 use std::convert::TryFrom;
 use std::io;
@@ -14,11 +16,11 @@ use termion::screen::AlternateScreen;
 use termion::terminal_size;
 use tui::backend::Backend;
 use tui::backend::TermionBackend;
-use tui::layout::{Alignment, Constraint, Direction, Layout};
+use tui::layout::{Alignment, Constraint, Corner, Direction, Layout};
 use tui::style::{Color, Modifier, Style};
-use tui::text::{Span, Spans};
+use tui::text::{Text, Span, Spans};
 use tui::widgets::canvas::{Canvas, Line, Points};
-use tui::widgets::{Block, Borders, Paragraph, Row, Table, Wrap};
+use tui::widgets::{Block, Borders, List, ListItem, Paragraph, Row, Table, Wrap};
 use tui::{Frame, Terminal};
 
 #[derive(PartialEq, AsRefStr)]
@@ -64,6 +66,7 @@ pub struct App {
     footprint: Vec<(f64, f64)>,
     initial_pose: Isometry2<f64>,
     pose_estimate: Isometry2<f64>,
+    pub rosout_listener: rosout::RosoutListener,
 }
 
 impl App {
@@ -99,6 +102,7 @@ impl App {
             listeners: listeners,
             initial_pose: initial_pose.clone(),
             pose_estimate: initial_pose,
+            rosout_listener: rosout::RosoutListener::new(100, true),
         }
     }
 
@@ -258,7 +262,7 @@ impl App {
         B: Backend,
     {
         let chunks = Layout::default()
-            .constraints([Constraint::Percentage(100)].as_ref())
+            .constraints([Constraint::Percentage(80), Constraint::Percentage(20)].as_ref())
             .split(f.size());
 
         let base_link_pose = tf_listener
@@ -337,5 +341,20 @@ impl App {
                 }
             });
         f.render_widget(canvas, chunks[0]);
+        f.render_widget(self.build_rosout_widget(), chunks[1]);
+    }
+
+    pub fn build_rosout_widget(&mut self) -> List
+    {
+        let mut log_items = Vec::<ListItem>::new();
+        let logstrings = self.rosout_listener.read_logstring_buffer();
+        for logstring in logstrings {
+            log_items.push(ListItem::new(Text::from(Span::from(logstring))));
+        }
+        // Reverse order to show the newest at the bottom.
+        log_items.reverse();
+        return List::new(log_items)
+            .block(Block::default().borders(Borders::ALL).title("rosout"))
+            .start_corner(Corner::BottomLeft);
     }
 }
