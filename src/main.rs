@@ -7,6 +7,7 @@ mod laser;
 mod listeners;
 mod map;
 mod marker;
+mod rosout;
 mod teleop;
 mod transformation;
 use std::sync::{Arc, Mutex};
@@ -58,6 +59,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut running_app = default_app_config.lock().unwrap();
     let mut terminal = running_app.init_terminal().unwrap();
+
+    let rosout_listener = rosout::RosoutListener::new();
 
     loop {
         match running_app.mode {
