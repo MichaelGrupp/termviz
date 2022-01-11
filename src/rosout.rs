@@ -21,7 +21,7 @@ impl LogBuffer {
 
     pub fn push_logstring(&mut self, logstring: String) {
         if self.producer.remaining() == 0 {
-          self.consumer.pop();
+            self.consumer.pop();
         }
         if self.producer.push(logstring).is_err() {
             eprintln!("failed to buffer rosout log")
@@ -29,13 +29,21 @@ impl LogBuffer {
     }
 
     pub fn read_logstrings(&self) -> std::vec::Vec<String> {
-      let mut logstrings = std::vec::Vec::<String>::new();
-      self.consumer.for_each(|logstring| {logstrings.push(logstring.clone());});
-      return logstrings;
+        let mut logstrings = std::vec::Vec::<String>::new();
+        self.consumer.for_each(|logstring| {
+            logstrings.push(logstring.clone());
+        });
+        return logstrings;
     }
 }
 
-fn format_logstring(level: i8, msg: &str, name: &str, stamp: &rosrust::Time, min_loglevel: i8) -> Option<String> {
+fn format_logstring(
+    level: i8,
+    msg: &str,
+    name: &str,
+    stamp: &rosrust::Time,
+    min_loglevel: i8,
+) -> Option<String> {
     use colored::{Color, Colorize};
     use rosrust_msg::rosgraph_msgs::Log;
 
@@ -81,8 +89,9 @@ impl RosoutListener {
                     );
                     match result {
                         Some(formatted_logstring) => cb_log_buffer
-                        .write()
-                        .unwrap().push_logstring(formatted_logstring),
+                            .write()
+                            .unwrap()
+                            .push_logstring(formatted_logstring),
                         None => {}
                     }
                 }

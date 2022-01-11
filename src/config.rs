@@ -52,7 +52,7 @@ impl Default for RosoutConfig {
     fn default() -> RosoutConfig {
         RosoutConfig {
             buffer_size: 150,
-            min_loglevel: 2,  // INFO, see rosmsg show rosgraph_msgs/Log
+            min_loglevel: 2, // INFO, see rosmsg show rosgraph_msgs/Log
             screen_percentage: 25,
             enabled_by_default: true,
         }
