@@ -96,6 +96,10 @@ impl RosoutListener {
         }
     }
 
+    pub fn is_buffering(&self) -> bool {
+        return self.log_buffer.read().unwrap().is_buffering;
+    }
+
     pub fn toggle_buffering(&mut self) {
         let current_value = self.log_buffer.read().unwrap().is_buffering;
         self.log_buffer.write().unwrap().is_buffering = !current_value;

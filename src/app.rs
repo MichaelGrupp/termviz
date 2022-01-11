@@ -187,7 +187,7 @@ impl App {
                 "j",
                 "Decreases the step size for manipulating the pose estimate.",
             ],
-            ["L", "Enables the rosout log display."],
+            ["L", "Switches the mode of the rosout log display: enabled -> paused -> disabled -> enabled ..."],
             ["h", "Shows this page."],
             ["Ctrl+c", "Quits the application."],
         ];
@@ -356,6 +356,17 @@ impl App {
         f.render_widget(canvas, chunks[0]);
         if self.rosout_widget_enabled {
         f.render_widget(self.build_rosout_widget(), chunks[1]);
+        }
+    }
+
+    pub fn toggle_rosout_widget(&mut self) {
+        if self.rosout_listener.is_buffering() {
+            self.rosout_listener.toggle_buffering();
+        } else if self.rosout_widget_enabled {
+            self.rosout_widget_enabled = !self.rosout_widget_enabled;
+        } else {
+            self.rosout_listener.toggle_buffering();
+            self.rosout_widget_enabled = true;
         }
     }
 
