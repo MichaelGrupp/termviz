@@ -194,7 +194,7 @@ impl App {
             [
                 "L",
                 "Switches the mode of the rosout log display: 
-                   enabled -> paused -> disabled -> enabled ...",
+                   enabled -> stopped -> disabled -> enabled ...",
             ],
             ["h", "Shows this page."],
             ["Ctrl+c", "Quits the application."],
