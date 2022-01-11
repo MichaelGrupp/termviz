@@ -67,6 +67,8 @@ pub struct App {
     initial_pose: Isometry2<f64>,
     pose_estimate: Isometry2<f64>,
     pub rosout_listener: rosout::RosoutListener,
+    rosout_screen_percentage: u16,
+    rosout_widget_enabled: bool,
 }
 
 impl App {
@@ -102,7 +104,9 @@ impl App {
             listeners: listeners,
             initial_pose: initial_pose.clone(),
             pose_estimate: initial_pose,
-            rosout_listener: rosout::RosoutListener::new(100, true),
+            rosout_listener: rosout::RosoutListener::new(100, true, config.rosout_config.min_loglevel),
+            rosout_screen_percentage: config.rosout_config.screen_percentage,
+            rosout_widget_enabled: config.rosout_config.enabled_by_default,
         }
     }
 
@@ -261,8 +265,10 @@ impl App {
     where
         B: Backend,
     {
+        assert!(self.rosout_screen_percentage <= 100);
+        let robot_view_percentage = 100 - self.rosout_screen_percentage;
         let chunks = Layout::default()
-            .constraints([Constraint::Percentage(80), Constraint::Percentage(20)].as_ref())
+            .constraints([Constraint::Percentage(robot_view_percentage), Constraint::Percentage(self.rosout_screen_percentage)].as_ref())
             .split(f.size());
 
         let base_link_pose = tf_listener
