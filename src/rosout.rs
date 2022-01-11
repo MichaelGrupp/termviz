@@ -97,8 +97,8 @@ impl RosoutListener {
     }
 
     pub fn toggle_buffering(&mut self) {
-        self.log_buffer.write().unwrap().is_buffering =
-            !self.log_buffer.read().unwrap().is_buffering;
+        let current_value = self.log_buffer.read().unwrap().is_buffering;
+        self.log_buffer.write().unwrap().is_buffering = !current_value;
     }
 
     pub fn read_logstring_buffer(&self) -> std::vec::Vec<String> {

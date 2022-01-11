@@ -16,7 +16,7 @@ use termion::screen::AlternateScreen;
 use termion::terminal_size;
 use tui::backend::Backend;
 use tui::backend::TermionBackend;
-use tui::layout::{Alignment, Constraint, Direction, Layout};
+use tui::layout::{Alignment, Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Modifier, Style};
 use tui::text::{Text, Span, Spans};
 use tui::widgets::canvas::{Canvas, Line, Points};
@@ -68,7 +68,7 @@ pub struct App {
     pose_estimate: Isometry2<f64>,
     pub rosout_listener: rosout::RosoutListener,
     rosout_screen_percentage: u16,
-    rosout_widget_enabled: bool,
+    pub rosout_widget_enabled: bool,
 }
 
 impl App {
@@ -104,7 +104,7 @@ impl App {
             listeners: listeners,
             initial_pose: initial_pose.clone(),
             pose_estimate: initial_pose,
-            rosout_listener: rosout::RosoutListener::new(100, true, config.rosout_config.min_loglevel),
+            rosout_listener: rosout::RosoutListener::new(config.rosout_config.buffer_size, config.rosout_config.enabled_by_default, config.rosout_config.min_loglevel),
             rosout_screen_percentage: config.rosout_config.screen_percentage,
             rosout_widget_enabled: config.rosout_config.enabled_by_default,
         }
@@ -265,11 +265,18 @@ impl App {
     where
         B: Backend,
     {
-        assert!(self.rosout_screen_percentage <= 100);
-        let robot_view_percentage = 100 - self.rosout_screen_percentage;
-        let chunks = Layout::default()
+        let chunks: Vec<Rect>;
+        if self.rosout_widget_enabled {
+            assert!(self.rosout_screen_percentage <= 100);
+            let robot_view_percentage = 100 - self.rosout_screen_percentage;
+            chunks = Layout::default()
             .constraints([Constraint::Percentage(robot_view_percentage), Constraint::Percentage(self.rosout_screen_percentage)].as_ref())
             .split(f.size());
+        } else {
+            chunks = Layout::default()
+            .constraints([Constraint::Percentage(100)].as_ref())
+            .split(f.size());
+        }
 
         let base_link_pose = tf_listener
             .lookup_transform(&self.static_frame, &self.robot_frame, rosrust::Time::new())
@@ -347,7 +354,9 @@ impl App {
                 }
             });
         f.render_widget(canvas, chunks[0]);
+        if self.rosout_widget_enabled {
         f.render_widget(self.build_rosout_widget(), chunks[1]);
+        }
     }
 
     pub fn build_rosout_widget(&mut self) -> Paragraph

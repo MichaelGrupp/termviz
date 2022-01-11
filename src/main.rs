@@ -151,6 +151,10 @@ fn main() -> Result<(), Box<dyn Error>> {
                                 }
                                 _ => running_app.mode = app::AppModes::Teleoperate,
                             },
+                            Key::Char('L') => {
+                              running_app.rosout_widget_enabled = !running_app.rosout_widget_enabled;
+                              running_app.rosout_listener.toggle_buffering();  
+                            },
                             Key::Char('h') => {
                                 running_app.mode = app::AppModes::HelpPage;
                             }

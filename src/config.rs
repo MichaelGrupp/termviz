@@ -42,6 +42,7 @@ impl Default for TeleopConfig {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RosoutConfig {
+    pub buffer_size: usize,
     pub min_loglevel: i8,
     pub screen_percentage: u16,
     pub enabled_by_default: bool,
@@ -50,6 +51,7 @@ pub struct RosoutConfig {
 impl Default for RosoutConfig {
     fn default() -> RosoutConfig {
         RosoutConfig {
+            buffer_size: 150,
             min_loglevel: 2,  // INFO, see rosmsg show rosgraph_msgs/Log
             screen_percentage: 25,
             enabled_by_default: true,
