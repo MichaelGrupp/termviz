@@ -16,11 +16,11 @@ use termion::screen::AlternateScreen;
 use termion::terminal_size;
 use tui::backend::Backend;
 use tui::backend::TermionBackend;
-use tui::layout::{Alignment, Constraint, Corner, Direction, Layout};
+use tui::layout::{Alignment, Constraint, Direction, Layout};
 use tui::style::{Color, Modifier, Style};
 use tui::text::{Text, Span, Spans};
 use tui::widgets::canvas::{Canvas, Line, Points};
-use tui::widgets::{Block, Borders, List, ListItem, Paragraph, Row, Table, Wrap};
+use tui::widgets::{Block, Borders, Paragraph, Row, Table, Wrap};
 use tui::{Frame, Terminal};
 
 #[derive(PartialEq, AsRefStr)]
@@ -344,17 +344,14 @@ impl App {
         f.render_widget(self.build_rosout_widget(), chunks[1]);
     }
 
-    pub fn build_rosout_widget(&mut self) -> List
+    pub fn build_rosout_widget(&mut self) -> Paragraph
     {
-        let mut log_items = Vec::<ListItem>::new();
         let logstrings = self.rosout_listener.read_logstring_buffer();
-        for logstring in logstrings {
-            log_items.push(ListItem::new(Text::from(Span::from(logstring))));
+        let mut all_spans = Vec::<Spans>::new();
+        for logstring in logstrings.iter() {
+            all_spans.extend(ansi_to_text(logstring.as_bytes().to_vec()).unwrap().lines);
         }
-        // Reverse order to show the newest at the bottom.
-        log_items.reverse();
-        return List::new(log_items)
-            .block(Block::default().borders(Borders::ALL).title("rosout"))
-            .start_corner(Corner::BottomLeft);
+        return Paragraph::new(Text::from(all_spans))
+            .block(Block::default().borders(Borders::ALL).title("rosout"));
     }
 }
